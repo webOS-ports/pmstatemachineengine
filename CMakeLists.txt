@@ -38,7 +38,7 @@ webos_add_compiler_flags(ALL -DFSM_CONFIG_USE_CUSTOM_ASSERT=0)
 webos_add_compiler_flags(ALL -DFSM_CONFIG_WEBOS_FEATURES=1)
 webos_add_compiler_flags(ALL -fPIC)
 
-webos_add_linker_options(ALL --version-script=${CMAKE_SOURCE_DIR}/src/PmStateMachineEngineExports.map)
+# webos_add_linker_options(ALL --version-script=${CMAKE_SOURCE_DIR}/src/PmStateMachineEngineExports.map)
 webos_add_linker_options(ALL --no-undefined)
 
 add_library(PmStateMachineEngine SHARED src/Fsm.c src/FsmDbg.c src/FsmAssert.cpp)
