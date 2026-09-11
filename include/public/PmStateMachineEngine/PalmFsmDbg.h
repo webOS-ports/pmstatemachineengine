@@ -48,8 +48,8 @@ extern "C" {
 
 
 #ifdef __GNUC__
-/// In FsmDbgLogLineFnType, the format string is arg #2;
-/// var-args begin at arg #3
+/// In FsmDbgLogLineFnType, the format string is arg #4;
+/// var-args begin at arg #5
 #define FSM_DBG_LOGFN_FMT_CHK __attribute__((__format__(__printf__, 4, 5)))
 #else
 #define FSM_DBG_LOGFN_FMT_CHK

@@ -258,6 +258,10 @@ public:
         FsmInitState(this, &GenericStateHandler, pName);
     }
 
+    virtual ~StateBase()
+    {
+    }
+
     virtual bool OnFsmEvent(const FsmEvtType_* pEvt, FsmType_* pFsm) = 0;
 
 private:
