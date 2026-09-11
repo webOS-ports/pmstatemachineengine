@@ -16,8 +16,27 @@
 #
 # LICENSE@@@
 
-# 'tests' does not seem to be buildable even under the old Makefiles, so this will not get called by the top-level
-# CMakeLists.txt for now
+# Standalone test build (not wired into the top-level webOS build):
+#
+#   cd tests && mkdir -p build && cd build && cmake .. && make
+#   ./PmStateMachineEngineTest
+#
+# The tests compile the engine sources directly, with webOS-specific
+# features (PmLogLib) disabled, so no external dependencies are needed.
 
-cmake_minimum_required (VERSION 2.8.7)
+cmake_minimum_required (VERSION 3.10...3.28)
 
+project (PmStateMachineEngineTest C CXX)
+
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include/public
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include/public/PmStateMachineEngine)
+
+add_definitions(-DFSM_CONFIG_USE_CUSTOM_ASSERT=0 -DFSM_CONFIG_WEBOS_FEATURES=0)
+
+add_executable(PmStateMachineEngineTest
+    src/Main.cpp
+    src/TestCommon.cpp
+    src/CplusplusTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/Fsm.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/FsmDbg.c)

@@ -29,7 +29,7 @@
  */
 
 
-#include <PmStateMachineEngine/Cplusplus/PalmFsm.hpp>
+#include <PmStateMachineEngine/PalmFsm.hpp>
 #include <PmStateMachineEngine/PalmFsm.h>
 #include <PmStateMachineEngine/PalmFsmDbg.h>
 

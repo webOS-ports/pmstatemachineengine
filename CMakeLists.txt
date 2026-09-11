@@ -47,5 +47,7 @@ webos_build_library()
 
 webos_config_build_doxygen(doc Doxyfile)
 
-# 'tests' does not seem to build with current Makefiles, so don't try it now...
+# The test suite builds standalone (no webOS dependencies); see
+# tests/CMakeLists.txt for instructions.  It is not part of the
+# component build.
 # add_subdirectory(tests)
