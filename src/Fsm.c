@@ -633,8 +633,9 @@ int
 RootStateHandler(FsmState* pOpaqueState, FsmMachine* pOpaqueFsm,
                  const FsmEvent* pEvt)
 {
-    //FsmMachineImpl* pFsm = (FsmMachineImpl*)pOpaqueFsm;
-    //FsmStateImpl* pState = (FsmStateImpl*)pOpaqueState;
+    (void)pOpaqueState;
+    (void)pOpaqueFsm;
+    (void)pEvt;
 
     /// ASSUMPTION: We should only see user events here
     FSM_ASSERT(pEvt->evtId >= kFsmEventFirstUserEvent);

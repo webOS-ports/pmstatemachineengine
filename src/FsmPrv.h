@@ -164,7 +164,7 @@ typedef struct FsmMachineImpl_ {
          * dispatch of kFsmEventBegin.  FsmBeginTransition() tests this
          * flag to determine which type of transition to record.
          */
-        int                     inInitialTrans:1;
+        unsigned int            inInitialTrans:1;
 
     }                       rt_;    ///< FSM runtime environment
 
