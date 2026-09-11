@@ -162,10 +162,13 @@ FsmInsertState(FsmMachine* pOpaqueFsm, FsmState* pOpaqueState, FsmState* pParent
     pState = pState->pParent_;
     i = 1;
     while (pState != &pFsm->rootState_.impl) {
+        FSM_ASSERT(pState && "parent chain MUST reach the FSM's root state; " \
+               "was the parent inserted into this FSM?");
         FSM_ASSERT(i < kFsmMaxStateNestingDepth);
         ++i;
         pState = pState->pParent_;
     }
+    (void)i; ///< consumed only by the assertion above in debug builds
 }
 
 
@@ -220,6 +223,10 @@ FsmDispatchEvent(FsmMachine* pOpaqueFsm, const FsmEvent* pEvt)
 
         FSM_ASSERT(FALSE && "FSM: NULL-Target-Dispatch Violation; " \
                "probably re-entered from ENTER, EXIT, or BEGIN event handler");
+
+        /// Fail safely in release (NDEBUG) builds instead of
+        /// dereferencing a NULL current state below
+        return FALSE;
     }
 
     /// Check for RTC violation
@@ -232,10 +239,13 @@ FsmDispatchEvent(FsmMachine* pOpaqueFsm, const FsmEvent* pEvt)
                       pFsm->rt_.pCurrentState->pName_);
 
         FSM_ASSERT(FALSE && "FSM: Run-to-Completion Violation");
+
+        /// Fail safely in release (NDEBUG) builds instead of
+        /// corrupting the in-progress dispatch below
+        return FALSE;
     }
 
     FSM_ASSERT(!pFsm->rt_.pTranTarget);
-    FSM_ASSERT(pEvt);
     FSM_ASSERT(pEvt->evtId >= kFsmEventFirstUserEvent);
 
     pFsm->rt_.pDispatchSrcState = pFsm->rt_.pCurrentState;
