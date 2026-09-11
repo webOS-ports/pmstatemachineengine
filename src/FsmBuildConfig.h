@@ -56,12 +56,15 @@ extern "C" {
 /**
  * Define the appropriate inline attribute for inline functions
  */
+/**
+ * @note "static __inline" (rather than "extern __inline") is required
+ *       for correctness with C99-and-later inline semantics (GCC 5+,
+ *       clang): "extern inline" emits an external definition in every
+ *       translation unit that includes the header, causing
+ *       multiple-definition link errors.
+ */
 #ifndef FSM_CONFIG_INLINE_FUNC
-    #ifdef __GNUC__
-        #define FSM_CONFIG_INLINE_FUNC  extern __inline
-    #else
-        #define FSM_CONFIG_INLINE_FUNC  extern __inline
-    #endif
+    #define FSM_CONFIG_INLINE_FUNC  static __inline
 #endif
 
 
