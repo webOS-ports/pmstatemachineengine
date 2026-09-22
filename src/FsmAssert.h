@@ -37,7 +37,7 @@
 #if (FSM_CONFIG_USE_CUSTOM_ASSERT)
 
     #ifdef	NDEBUG
-        # define FSM_ASSERT(pred__)     (void (0))
+        # define FSM_ASSERT(pred__)     ((void)0)
     #else
     
         #ifdef __cplusplus 

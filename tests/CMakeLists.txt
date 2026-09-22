@@ -16,8 +16,65 @@
 #
 # LICENSE@@@
 
-# 'tests' does not seem to be buildable even under the old Makefiles, so this will not get called by the top-level
-# CMakeLists.txt for now
+# Standalone test build (not wired into the top-level webOS build):
+#
+#   cd tests && mkdir -p build && cd build && cmake .. && make
+#   ./PmStateMachineEngineTest                       # functional tests
+#   ./PmStateMachineEngineStress [iterations] [seed] # stress/invariant tests
+#
+# Options:
+#   -DENABLE_SANITIZERS=ON   build with ASan + UBSan (host debugging)
+#
+# The tests compile the engine sources directly, with webOS-specific
+# features (PmLogLib) disabled, so no external dependencies are needed.
+# Binaries are built with hardening flags (stack protector, fortified
+# libc calls, format-security warnings as errors).
 
-cmake_minimum_required (VERSION 2.8.7)
+cmake_minimum_required (VERSION 3.10...3.28)
 
+project (PmStateMachineEngineTest C CXX)
+
+option(ENABLE_SANITIZERS "Build tests with AddressSanitizer + UBSan" OFF)
+
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include/public
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include/public/PmStateMachineEngine)
+
+add_definitions(-DFSM_CONFIG_USE_CUSTOM_ASSERT=0 -DFSM_CONFIG_WEBOS_FEATURES=0)
+
+set(ENGINE_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/Fsm.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/FsmDbg.c)
+
+# Hardening + diagnostics for all test binaries
+add_compile_options(
+    -Wall -Wextra
+    -Wformat=2 -Werror=format-security
+    -fstack-protector-strong)
+if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT ENABLE_SANITIZERS)
+    # _FORTIFY_SOURCE requires optimization and conflicts with ASan
+    add_compile_options(-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2)
+endif ()
+
+if (ENABLE_SANITIZERS)
+    add_compile_options(-fsanitize=address,undefined -fno-sanitize-recover=all)
+    add_link_options(-fsanitize=address,undefined)
+endif ()
+
+add_executable(PmStateMachineEngineTest
+    src/Main.cpp
+    src/TestCommon.cpp
+    src/CplusplusTest.cpp
+    ${ENGINE_SOURCES})
+
+# The legacy functional tests intentionally define handler callbacks
+# that ignore some parameters
+target_compile_options(PmStateMachineEngineTest PRIVATE -Wno-unused-parameter)
+
+add_executable(PmStateMachineEngineStress
+    src/StressTest.cpp
+    ${ENGINE_SOURCES})
+
+enable_testing()
+add_test(NAME functional COMMAND PmStateMachineEngineTest)
+add_test(NAME stress COMMAND PmStateMachineEngineStress 200000)

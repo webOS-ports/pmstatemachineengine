@@ -164,7 +164,7 @@ typedef struct FsmMachineImpl_ {
          * dispatch of kFsmEventBegin.  FsmBeginTransition() tests this
          * flag to determine which type of transition to record.
          */
-        int                     inInitialTrans:1;
+        unsigned int            inInitialTrans:1;
 
     }                       rt_;    ///< FSM runtime environment
 
@@ -190,7 +190,7 @@ RootStateHandler(FsmState* pState, FsmMachine* pFsm,
 FSM_CONFIG_INLINE_FUNC int
 IsLogLevelEnabled(const FsmMachineImpl* const pImpl,
                   enum FsmDbgLogLevel   const fsmloglevel,
-                  int                   const pmloglevel)
+                  [[maybe_unused]] int const pmloglevel)
 {
     if (!pImpl->logOutKind_) {
         return 0;
@@ -205,9 +205,9 @@ IsLogLevelEnabled(const FsmMachineImpl* const pImpl,
     }
     #endif
     else {
-        FSM_ASSERT(0 && "UNEXPECTED logOutKind_");                  \
+        FSM_ASSERT(0 && "UNEXPECTED logOutKind_");
+        return 0;
     }
-
 }
 
 #if FSM_CONFIG_WEBOS_FEATURES
@@ -220,20 +220,28 @@ IsLogLevelEnabled(const FsmMachineImpl* const pImpl,
               : (0)                                                         \
         )
 #else
-    #define LOG_VIA_PMLOGLIB(pImpl__, level__, pmlogLevel__, ...)   (0)
+    #define LOG_VIA_PMLOGLIB(pImpl__, pmlogLevel__, ...)   (0)
 #endif
 
 
+/**
+ * @note The log-level threshold check MUST be nested inside the
+ *       callback-output branch (rather than being part of the
+ *       branch-selection condition); otherwise a message that is
+ *       merely below the threshold would fall through to the
+ *       "UNEXPECTED logOutKind_" assertion.
+ */
 #define FSM_LOG_HELPER(pImpl__, level__, pmlogLevel__, ...)                 \
     do {                                                                    \
         if ((pImpl__)->logOutKind_) {                                       \
             if (LOG_VIA_PMLOGLIB((pImpl__), (pmlogLevel__), __VA_ARGS__)) { \
             }                                                               \
-            else if (kFsmLogOutputKind_cb == (pImpl__)->logOutKind_ &&      \
-                     IsLogLevelEnabled((pImpl__), (level__), (pmlogLevel__))) { \
-                (pImpl__)->logOutput.pLogFunc_((FsmMachine*)(pImpl__),      \
+            else if (kFsmLogOutputKind_cb == (pImpl__)->logOutKind_) {      \
+                if (IsLogLevelEnabled((pImpl__), (level__), (pmlogLevel__))) { \
+                    (pImpl__)->logOutput.pLogFunc_((FsmMachine*)(pImpl__),  \
                                                (void*)(pImpl__)->logCookie_,\
                                                (level__), __VA_ARGS__);     \
+                }                                                           \
             }                                                               \
             else {                                                          \
                 FSM_ASSERT(0 && "UNEXPECTED logOutKind_");                  \
