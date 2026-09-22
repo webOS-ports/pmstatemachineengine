@@ -190,12 +190,8 @@ RootStateHandler(FsmState* pState, FsmMachine* pFsm,
 FSM_CONFIG_INLINE_FUNC int
 IsLogLevelEnabled(const FsmMachineImpl* const pImpl,
                   enum FsmDbgLogLevel   const fsmloglevel,
-                  int                   const pmloglevel)
+                  [[maybe_unused]] int const pmloglevel)
 {
-    #if !(FSM_CONFIG_WEBOS_FEATURES)
-    (void)pmloglevel;
-    #endif
-
     if (!pImpl->logOutKind_) {
         return 0;
     }
